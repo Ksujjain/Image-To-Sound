@@ -1,50 +1,38 @@
-import tkinter as tk
-from tkinter import messagebox
-import time
-import threading
+import pytesseract
+from PIL import Image
+import pyttsx3
+import os
 
-class AlarmClock:
-    def _init_(self, root):
-        self.root = root
-        self.root.title("Alarm Clock")
-        
-        self.label = tk.Label(root, text="Set Alarm (HH:MM:SS):")
-        self.label.pack()
-        
-        self.entry = tk.Entry(root)
-        self.entry.pack()
-        
-        self.button = tk.Button(root, text="Set Alarm", command=self.set_alarm)
-        self.button.pack()
-        
-    def set_alarm(self):
-        alarm_time = self.entry.get()
-        
-        try:
-            # Parse the user-provided time
-            alarm_h, alarm_m, alarm_s = map(int, alarm_time.split(':'))
-            
-            # Get the current time
-            current_time = time.localtime()
-            current_h, current_m, current_s = current_time.tm_hour, current_time.tm_min, current_time.tm_sec
-            
-            # Calculate the time difference in seconds
-            time_diff = (alarm_h - current_h) * 3600 + (alarm_m - current_m) * 60 + (alarm_s - current_s)
-            
-            if time_diff < 0:
-                raise ValueError("Invalid time")
-            
-            # Schedule the alarm
-            alarm_thread = threading.Timer(time_diff, self.trigger_alarm)
-            alarm_thread.start()
-            messagebox.showinfo("Alarm Set", f"Alarm set for {alarm_time}.")
-        except ValueError:
-            messagebox.showerror("Invalid Time", "Please enter a valid future time.")
+# Path to the Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = r'C:/Users/haida/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 
-    def trigger_alarm(self):
-        messagebox.showinfo("Alarm", "Time's up! Alarm triggered.")
-        
-if _name_ == '_main_':
-    root = tk.Tk()
-    alarm_clock = AlarmClock(root)
-    root.mainloop()
+# Image and sound file paths
+image_path = 'C:/Users/haida/forest_drama.png'
+sound_path = 'C:/Users/haida/forest_sound.mp3'
+
+# Function to perform OCR on the image
+def perform_ocr(image_path):
+    image = Image.open(image_path)
+
+    text = pytesseract.image_to_string(image)
+    return text
+
+# Function to play the background sound
+def show_Image(sound_path):
+    os.system(f"start {sound_path}")
+
+# Main function
+def main():
+    # Perform OCR on the image
+    ocr_text = perform_ocr(image_path)
+    print("OCR Text:", ocr_text)
+
+    # Play the background sound
+    show_Image(sound_path)
+
+    engine = pyttsx3.init()
+    engine.say(ocr_text)
+    engine.runAndWait()
+
+if _name_ == "_main_":
+    main()
